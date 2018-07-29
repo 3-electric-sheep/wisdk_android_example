@@ -1,0 +1,93 @@
+{
+  "project_info": {
+    "project_number": "955521662890",
+    "firebase_url": "https://wisdkdemo.firebaseio.com",
+    "project_id": "wisdkdemo",
+    "storage_bucket": "wisdkdemo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955521662890:android:0dbfb079f4ee1d53",
+        "android_client_info": {
+          "package_name": "com.tes.wi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "955521662890-jl9pc2pkfqc1043j7g75qk9sjn2jjbn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeb1fDNTwCL3PMarnd2mc5BsVTgSl6N8Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955521662890:android:1cc3001b66f705f0",
+        "android_client_info": {
+          "package_name": "com.welcomeinterruption.wisdkdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "955521662890-tc9fkqo1b60li06rgbo7nhaor4ode26d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.welcomeinterruption.wisdkdemo",
+            "certificate_hash": "7e999ef09e9ea8406e09257e30f3a0ba0234fd92"
+          }
+        },
+        {
+          "client_id": "955521662890-jl9pc2pkfqc1043j7g75qk9sjn2jjbn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeb1fDNTwCL3PMarnd2mc5BsVTgSl6N8Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "955521662890-jl9pc2pkfqc1043j7g75qk9sjn2jjbn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "955521662890-j83kfpvcm545lks9hgdimlqh9r8ht11b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.3-electric-sheep.wi"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

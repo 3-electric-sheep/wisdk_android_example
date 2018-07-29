@@ -1,0 +1,101 @@
+package com.welcomeinterruption.wisdkdemo;
+
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.welcomeinterruption.wisdk.TesApiException;
+import com.welcomeinterruption.wisdk.TesWIApp;
+import com.welcomeinterruption.wisdk.TesConfig;
+
+import java.util.Map;
+
+public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIAppListener {
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String PROVIDER_KEY = "5b53e675ec8d831eb30242d3";
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        TesWIApp.createManager(this, this, R.layout.activity_main);
+        TesConfig config = new TesConfig(PROVIDER_KEY);
+
+        config.authAutoAuthenticate = true;
+        config.deviceTypes = TesConfig.deviceTypeGCM | TesConfig.deviceTypeWallet;
+        try {
+            config.authCredentials = new JSONObject();
+            config.authCredentials.put("anonymous_user", true);
+        }
+        catch (JSONException e){
+            Log.e(TAG, "Failed to create authentication details: "+e.getLocalizedMessage());
+        }
+
+        config.testPushProfile = "wisdk-example-fcm";
+        config.pushProfile = "wisdk-example-fcm";
+
+        TesWIApp app = TesWIApp.manager();
+        app.listener = this;
+        app.start(config);
+    }
+
+
+    @Override
+    public void authorizeFailure(int statusCode, byte[] data, boolean notModified, long networkTimeMs, Map<String, String> headers) {
+        Log.i(TAG, String.format("-->authorizeFailure: %d", statusCode));
+    }
+
+    @Override
+    public void onAutoAuthenticate(int status, @Nullable JSONObject responseObject, @Nullable TesApiException error) {
+        Log.i(TAG, String.format("--> onAutoAuthenticate: %d %s", status, responseObject.toString()));
+    }
+
+    @Override
+    public void newAccessToken(@Nullable String token) {
+        Log.i(TAG, String.format("--> newAccessToken: %s", token));
+
+    }
+
+    @Override
+    public void newDeviceToken(@Nullable String token) {
+        Log.i(TAG, String.format("--> newDeviceToken: %s", token));
+    }
+
+    @Override
+    public void newPushToken(@Nullable String token) {
+        Log.i(TAG, String.format("--> newPushToken: %s", token));
+    }
+
+    @Override
+    public void onRemoteNotification(@Nullable JSONObject data) {
+        Log.i(TAG, String.format("--> onRemoteNotification: %s", data.toString()));
+    }
+
+    @Override
+    public void onRemoteDataNotification(@Nullable JSONObject data) {
+        Log.i(TAG, String.format("--> onRemoteDataNotification: %s", data.toString()));
+    }
+
+    @Override
+    public void onWalletNotification(@Nullable JSONObject data) {
+        Log.i(TAG, String.format("--> onWalletNotification: %s", data.toString()));
+    }
+
+    @Override
+    public void onRefreshToken(@NonNull String token) {
+        Log.i(TAG, String.format("--> onRefreshToken: %s", token));
+    }
+
+    @Override
+    public void saveWallet(int requestCode, int resultCode, Intent data, String msg) {
+        Log.i(TAG, String.format("--> saveWallet: %d %d %s Intent: %s", requestCode, resultCode, msg, data.toString()));
+    }
+}
