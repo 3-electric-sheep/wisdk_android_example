@@ -46,7 +46,8 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
         TesConfig config = new TesConfig(PROVIDER_KEY);
 
         config.authAutoAuthenticate = true;
-        config.deviceTypes = TesConfig.deviceTypeGCM | TesConfig.deviceTypeWallet;
+        config.deviceTypes = TesConfig.deviceTypeFCM;
+        config.fcmSenderId = "955521662890"; // from the firebird console
         try {
             config.authCredentials = new JSONObject();
             config.authCredentials.put("anonymous_user", true);
@@ -93,11 +94,25 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
     @Override
     public void onRemoteNotification(@Nullable JSONObject data) {
         Log.i(TAG, String.format("--> onRemoteNotification: %s", data.toString()));
+        try {
+            TesWIApp app = TesWIApp.manager();
+            String event_id = data.getString("event_id");
+            app.updateEventAck(event_id, true, null);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onRemoteDataNotification(@Nullable JSONObject data) {
         Log.i(TAG, String.format("--> onRemoteDataNotification: %s", data.toString()));
+        try {
+            TesWIApp app = TesWIApp.manager();
+            String event_id = data.getString("event_id");
+            app.updateEventAck(event_id, true, null);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

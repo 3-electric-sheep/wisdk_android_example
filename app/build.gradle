@@ -32,13 +32,13 @@ dependencies {
     // for wisdk
     implementation "com.google.android.gms:play-services-base:15.0.1"
     implementation "com.google.android.gms:play-services-location:15.0.1"
-    implementation "com.google.android.gms:play-services-wallet:15.0.1"
+    implementation "com.google.android.gms:play-services-wallet:16.0.0"
 
     // Firebase dependencies
-    implementation "com.google.firebase:firebase-core:16.0.1"
+    implementation "com.google.firebase:firebase-core:16.0.3"
 
     // Firebase cloud messaging plus badge support
-    implementation "com.google.firebase:firebase-messaging:17.1.0"
+    implementation "com.google.firebase:firebase-messaging:17.3.1"
 }
 
 // ADD THIS AT THE BOTTOM
