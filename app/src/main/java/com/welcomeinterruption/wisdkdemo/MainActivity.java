@@ -22,11 +22,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.welcomeinterruption.wisdk.TesApiException;
+import com.welcomeinterruption.wisdk.TesApi;
+import com.welcomeinterruption.wisdk.TesLocationInfo;
 import com.welcomeinterruption.wisdk.TesWIApp;
 import com.welcomeinterruption.wisdk.TesConfig;
 
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TesWIApp.createManager(this, this, R.layout.activity_main);
+
+        TesWIApp app = TesWIApp.createManager(this);
         TesConfig config = new TesConfig(PROVIDER_KEY);
 
         config.authAutoAuthenticate = true;
@@ -59,11 +62,55 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
         config.testPushProfile = "wisdk-example-fcm";
         config.pushProfile = "wisdk-example-fcm";
 
-        TesWIApp app = TesWIApp.manager();
+        if (!app.checkPlayServices(this)) {
+            Log.i(TAG, "Play service not avaialble or out of date - location monitoring will not work");
+        }
+
         app.listener = this;
         app.start(config);
+
+
+
+        JSONObject params = new JSONObject();
+        app.updateAccountProfile(params, new TesApi.TesApiListener() {
+            @Override
+            public void onSuccess(JSONObject result) {
+                // the call succeeded returns a dictionary with a data field containing the updated user info
+            }
+
+            @Override
+            public void onFailed(JSONObject result) {
+                // the call made it to the server but there was a logical failure (ie. invalid data)
+                // A dictionary containing success=9, and a field called msg which contains the error string
+            }
+
+            @Override
+            public void onOtherError(Exception error) {
+                // a network or other transport type error
+
+            }
+        });
     }
 
+
+
+    @Override
+    public boolean onLocationPermissionCheck(String result, boolean just_blocked) {
+        if (result == "restricted" && !just_blocked)
+            return true;
+
+        return false;
+    }
+
+    @Override
+    public void onLocationUpdate(TesLocationInfo loc) {
+        Log.i(TAG, String.format("--> onLocationUpdate: %s", loc.toString()));
+    }
+
+    @Override
+    public void onGeoLocationUpdate(TesLocationInfo loc) {
+        Log.i(TAG, String.format("--> onGeoLocationUpdate: %s", loc.toString()));
+    }
 
     @Override
     public void authorizeFailure(int statusCode, byte[] data, boolean notModified, long networkTimeMs, Map<String, String> headers) {
@@ -71,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
     }
 
     @Override
-    public void onAutoAuthenticate(int status, @Nullable JSONObject responseObject, @Nullable TesApiException error) {
+    public void onAutoAuthenticate(int status, @Nullable JSONObject responseObject, @Nullable Exception error) {
         Log.i(TAG, String.format("--> onAutoAuthenticate: %d %s", status, responseObject.toString()));
     }
 
@@ -128,5 +175,10 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
     @Override
     public void saveWallet(int requestCode, int resultCode, Intent data, String msg) {
         Log.i(TAG, String.format("--> saveWallet: %d %d %s Intent: %s", requestCode, resultCode, msg, data.toString()));
+    }
+
+    @Override
+    public void onError(String errorType, Exception error) {
+        Log.i(TAG, String.format("--> onError: %s %s", errorType, error.getMessage()));
     }
 }
