@@ -27,7 +27,14 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    //implementation project(":wisdk") // for dev only
+    // to run in dev mode :-
+    // 1. rename wisdk dir to wisdk-prod-lib
+    // 2. ln -s wisdk ~/Clients/3ElectricSheep/wisdk/wisdk_android
+    // 3. uncoment implementation project(":wisdk") // for dev only
+    // 4. commend out the lib call
+    // to run back in prod mode just reverse these changes
+
+    // implementation project(":wisdk") // for dev only
 
     // the wi SDK
     implementation 'com.github.3-electric-sheep:wisdk_android:1.0.4'
