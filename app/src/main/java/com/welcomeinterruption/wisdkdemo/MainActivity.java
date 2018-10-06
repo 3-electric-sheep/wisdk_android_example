@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,8 +37,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIAppListener {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String PROVIDER_KEY = "5b53e675ec8d831eb30242d3";
 
+    static final String PROVIDER_KEY = "5bb54bd58f3f541552dd0097";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +49,16 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
         TesWIApp app = TesWIApp.createManager(this);
         TesConfig config = new TesConfig(PROVIDER_KEY);
 
+        if (BuildConfig.DEBUG) {
+            config.environment = TesConfig.ENV_TEST;
+            //config.testServer = "http://10.0.2.2:9010";
+        }
+        else {
+            config.environment = TesConfig.ENV_PROD;
+        }
+
         config.authAutoAuthenticate = true;
-        config.deviceTypes = TesConfig.deviceTypeFCM;
+        config.deviceTypes = TesConfig.deviceTypeFCM | TesConfig.deviceTypePassive;
         config.fcmSenderId = "955521662890"; // from the firebird console
         try {
             config.authCredentials = new JSONObject();
@@ -63,36 +72,107 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
         config.pushProfile = "wisdk-example-fcm";
 
         if (!app.checkPlayServices(this)) {
-            Log.i(TAG, "Play service not avaialble or out of date - location monitoring will not work");
+            Log.i(TAG, "Play service not available or out of date - location monitoring will not work");
         }
 
         app.listener = this;
         app.start(config);
 
+    }
 
+    @Override
+    public void onStartupComplete(boolean isAuthorized) {
+        Log.i(TAG, "Startup complete");
+
+        TesWIApp app = TesWIApp.manager();
 
         JSONObject params = new JSONObject();
+        try {
+            params.put("first_name", "John");
+            params.put("last_name", "Smith");
+            params.put("email", "jsmith@3es.com.au");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         app.updateAccountProfile(params, new TesApi.TesApiListener() {
             @Override
             public void onSuccess(JSONObject result) {
                 // the call succeeded returns a dictionary with a data field containing the updated user info
+                // a  dictionary containing success=1 and a data field with updated profile info.
+                JSONObject data = null;
+                try {
+                    data = result.getJSONObject("data");
+                    Log.i(TAG, String.format("--> updateAccountProfile Success %s", data));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
             public void onFailed(JSONObject result) {
                 // the call made it to the server but there was a logical failure (ie. invalid data)
-                // A dictionary containing success=9, and a field called msg which contains the error string
+                // A dictionary containing success=0, and a field called msg which contains the error string
+                String msg = null;
+                try {
+                    msg = result.getString("msg");
+                    Log.i(TAG, String.format("--> updateAccountProfile Fail %s", msg));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
             public void onOtherError(Exception error) {
                 // a network or other transport type error
+                Log.i(TAG, String.format("--> updateAccountProfile error: %s", error.getLocalizedMessage()));
+
+            }
+        });
+
+        params = new JSONObject();
+        try {
+            params.put("relative_start", "20d");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        app.listAlertedEvents(params, new TesApi.TesApiListener() {
+            @Override
+            public void onSuccess(JSONObject result) {
+                // the call succeeded returns a dictionary with a data field containing the updated user info
+                // a  dictionary containing success=1 and a data field with updated profile info.
+                JSONArray data = null;
+                try {
+                    data = result.getJSONArray("data");
+                    Log.i(TAG, String.format("--> listAlertedEvents Success %s", data));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailed(JSONObject result) {
+                // the call made it to the server but there was a logical failure (ie. invalid data)
+                // A dictionary containing success=0, and a field called msg which contains the error string
+                String msg = null;
+                try {
+                    msg = result.getString("msg");
+                    Log.i(TAG, String.format("--> listAlertedEvents Fail %s", msg));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onOtherError(Exception error) {
+                // a network or other transport type error
+                Log.i(TAG, String.format("--> listAlertedEvents error: %s", error.getLocalizedMessage()));
 
             }
         });
     }
-
-
 
     @Override
     public boolean onLocationPermissionCheck(String result, boolean just_blocked) {
@@ -141,13 +221,6 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
     @Override
     public void onRemoteNotification(@Nullable JSONObject data) {
         Log.i(TAG, String.format("--> onRemoteNotification: %s", data.toString()));
-        try {
-            TesWIApp app = TesWIApp.manager();
-            String event_id = data.getString("event_id");
-            app.updateEventAck(event_id, true, null);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
