@@ -29,47 +29,46 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.welcomeinterruption.wisdk.TesApi;
+import com.welcomeinterruption.wisdk.TesISO8601DateParser;
 import com.welcomeinterruption.wisdk.TesLocationInfo;
 import com.welcomeinterruption.wisdk.TesWIApp;
 import com.welcomeinterruption.wisdk.TesConfig;
 
+import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIAppListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    static final String PROVIDER_KEY = "5bb54bd58f3f541552dd0097";
+
+    static final String PROD_PROVIDER_KEY = "xxxxxxxxxxxxxxxxxxxxxxxx"; // <- provided by us
+    static final String TEST_PROVIDER_KEY = "5bb54bd58f3f541552dd0097"; // <- provided bv us
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent x = this.getIntent();
+        Log.i(TAG, (x.getExtras()!=null)?x.getExtras().toString(): "<NONE>");
+
+        Log.i(TAG, (x.getStringExtra("event_id")!=null)?x.getStringExtra("event_id"):"<NONE>");
+
 
         TesWIApp app = TesWIApp.createManager(this);
-        TesConfig config = new TesConfig(PROVIDER_KEY);
+        TesConfig config = new TesConfig(PROD_PROVIDER_KEY, TEST_PROVIDER_KEY);
 
         if (BuildConfig.DEBUG) {
             config.environment = TesConfig.ENV_TEST;
-            //config.testServer = "http://10.0.2.2:9010";
+           // config.testServer = "http://10.0.2.2:9010";
         }
         else {
             config.environment = TesConfig.ENV_PROD;
         }
 
-        config.authAutoAuthenticate = true;
         config.deviceTypes = TesConfig.deviceTypeFCM | TesConfig.deviceTypePassive;
-        config.fcmSenderId = "955521662890"; // from the firebird console
-        try {
-            config.authCredentials = new JSONObject();
-            config.authCredentials.put("anonymous_user", true);
-        }
-        catch (JSONException e){
-            Log.e(TAG, "Failed to create authentication details: "+e.getLocalizedMessage());
-        }
-
-        config.testPushProfile = "wisdk-example-fcm";
-        config.pushProfile = "wisdk-example-fcm";
+        //config.fcmSenderId = "955521662890"; // from the firebird console
 
         if (!app.checkPlayServices(this)) {
             Log.i(TAG, "Play service not available or out of date - location monitoring will not work");
@@ -86,11 +85,17 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
 
         TesWIApp app = TesWIApp.manager();
 
+        Date now = new Date();
+
         JSONObject params = new JSONObject();
+        JSONObject attributes = new JSONObject();
         try {
-            params.put("first_name", "John");
-            params.put("last_name", "Smith");
-            params.put("email", "jsmith@3es.com.au");
+            attributes.put("SeatRegistrationDate", TesISO8601DateParser.toString(now));
+            attributes.put("Seat", "1234");
+            attributes.put("Bay", "13");
+            params.put("first_name", "kkbpdcme");
+            params.put("attributes", attributes);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -227,9 +232,11 @@ public class MainActivity extends AppCompatActivity implements TesWIApp.TesWIApp
     public void onRemoteDataNotification(@Nullable JSONObject data) {
         Log.i(TAG, String.format("--> onRemoteDataNotification: %s", data.toString()));
         try {
-            TesWIApp app = TesWIApp.manager();
-            String event_id = data.getString("event_id");
-            app.updateEventAck(event_id, true, null);
+            Iterator<?> keys = data.keys();
+            while(keys.hasNext() ) {
+                String key = (String)keys.next();
+                Log.i(TAG, String.format( "Key: %s Value: %s" , key, data.get(key).toString()));
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
